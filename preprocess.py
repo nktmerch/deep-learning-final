@@ -2,6 +2,11 @@ import pickle
 import numpy as np
 import tensorflow as tf
 import os
+import csv
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 
 def unpickle(file):
 	"""
@@ -21,7 +26,7 @@ def unpickle(file):
 	return dict
 
 
-def get_data(file_path, first_class, second_class):
+def get_data(image_paths, label_paths):
 	"""
 	Given a file path and two target classes, returns an array of 
 	normalized inputs (images) and an array of labels. 
@@ -42,12 +47,20 @@ def get_data(file_path, first_class, second_class):
 	inputs are of type np.float32 and has size (num_inputs, width, height, num_channels) and labels 
 	has size (num_examples, num_classes)
 	"""
-	unpickled_file = unpickle(file_path)
-	inputs = unpickled_file[b'data']
-	labels = unpickled_file[b'labels']
-	# TODO: Do the rest of preprocessing! 
-	valid = [(l, i) for l, i in zip(labels, inputs) if (l == first_class) or (l == second_class)]
-	valid_labels = tf.one_hot([(l == second_class) for l, i in valid], 2)
-	valid_inputs = tf.divide(tf.transpose(tf.reshape([i for l, i in valid], (-1, 3, 32, 32)), (0, 2, 3, 1)), 255)
-	valid_inputs = tf.cast(valid_inputs, dtype=np.float32)
-	return (valid_inputs, valid_labels)
+	labels = []
+	with open(label_paths) as csv_file:
+		csv_reader = csv.reader(csv_file, delimiter = ',')
+		for row in csv_reader:
+			labels.append(int(row[1]))
+	labels_one_hot = tf.one_hot(labels, depth =2 )
+	images = []
+	with open(image_paths) as csv_file:
+		csv_reader = csv.reader(csv_file)
+		for path in csv_reader:
+			img = Image.open(path[0])
+			resized_img = np.resize(img, (32,32,1)).astype(np.float32)
+			images.append(resized_img)
+	images = tf.convert_to_tensor(images)
+	print(images.shape)
+	print(labels_one_hot.shape)
+	return images, labels_one_hot

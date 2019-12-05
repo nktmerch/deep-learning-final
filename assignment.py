@@ -65,11 +65,16 @@ def test_model(model, test_inputs, test_labels):
     return model.evaluate(test_inputs, test_labels, batch_size=32)
 
 def main():
-    train_inputs, train_labels = get_data("./CIFAR_data_compressed/test", 4, 6)
-    test_inputs, test_labels = get_data("./CIFAR_data_compressed/test", 4, 6)
+    # print("Training")
+    # train_inputs, train_labels = get_data('MURA-v1.1/train_image_paths.csv','MURA-v1.1/train_labeled_studies.csv')
+    # print("finished training")
+    test_inputs, test_labels = get_data('MURA-v1.1/valid_image_paths.csv', 'MURA-v1.1/valid_labeled_studies.csv')
 
     model = init_model()
-    train_model(model, train_inputs, train_labels)
-    result = test_model(model, test_inputs, test_labels)    
+    train_model(model, test_inputs, test_labels)
+    result = test_model(model, test_inputs, test_labels)
+    print(result)
 
-main()
+if __name__ == '__main__':
+	main()
+
