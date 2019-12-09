@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 
-from preprocess import get_data
+from preprocess import source_label_and_image
 
 
 """
@@ -59,6 +59,7 @@ def init_model():
 def train_model(model, train_inputs, train_labels):
     adam = Adam(learning_rate=0.001)
     model.compile(loss='categorical_crossentropy', optimizer=adam)
+    print("ENTRY SHAPE", train_inputs[0].shape)
     model.fit(train_inputs, train_labels, batch_size=64, epochs=10)
 
 def test_model(model, test_inputs, test_labels):
@@ -68,12 +69,15 @@ def main():
     # print("Training")
     # train_inputs, train_labels = get_data('MURA-v1.1/train_image_paths.csv','MURA-v1.1/train_labeled_studies.csv')
     # print("finished training")
-    test_inputs, test_labels = get_data('MURA-v1.1/valid_image_paths.csv', 'MURA-v1.1/valid_labeled_studies.csv')
-
+    #test_inputs, test_labels = get_data('MURA-v1.1/valid_image_paths.csv', 'MURA-v1.1/valid_labeled_studies.csv')
+    labels, images = source_label_and_image('MURA-v1.1/valid_image_paths.csv')
+    print(labels)
+    print(images)
     model = init_model()
-    train_model(model, test_inputs, test_labels)
-    result = test_model(model, test_inputs, test_labels)
-    print(result)
+    train_model(model, images, labels)
+    #result = test_model(model, test_inputs, test_labels)
+    #print(result)
+    print("ass!")
 
 if __name__ == '__main__':
 	main()
