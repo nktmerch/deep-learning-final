@@ -2,8 +2,22 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
+import argparse
 
-from preprocess import source_label_and_image
+from preprocess import get_data
+
+parser = argparse.ArgumentParser(description='ASSIGNMENT')
+
+parser.add_argument('--train-csv-path', type=str, default='MURA-v1.1/train_image_paths.csv',
+					help='Path to the CSV list of folder sorted images')
+
+parser.add_argument('--test-csv-path', type=str, default='MURA-v1.1/valid_image_paths.csv',
+					help='Path to the CSV list of folder sorted images')
+
+parser.add_argument('--warp-size', type=int, default=128,
+                    help='Shape we warp images to')
+
+args = parser.parse_args()
 
 
 """
@@ -39,20 +53,21 @@ TODO:
 4) Modify model architecture based on best practice |
 """
 
-def init_model():
-    model = tf.keras.Sequential()
-    model.add(Conv2D(16, (2,2), activation='relu'))
-    model.add(MaxPool2D())
-    model.add(Conv2D(20, (2,2), activation='relu')) # The (2,2) here might be wrong
-    model.add(MaxPool2D())
-    model.add(Conv2D(20, (2,2), activation='relu'))
-    model.add(MaxPool2D())
-    model.add(Flatten())
-    model.add(Dense(35, activation='relu'))
-    model.add(Dropout(0.3))
-    model.add(Dense(8, activation='relu'))
-    model.add(Dropout(0.3))
-    model.add(Dense(2, activation='softmax'))
+def init_model(img_size):
+    model = tf.keras.Sequential([
+        Conv2D(16, (2,2), activation='relu'),
+        MaxPool2D(),
+        Conv2D(20, (2,2), activation='relu'),
+        MaxPool2D(),
+        Conv2D(20, (2,2), activation='relu'),
+        MaxPool2D(),
+        Flatten(),
+        Dense(35, activation='relu'),
+        Dropout(0.3),
+        Dense(8, activation='relu'),
+        Dropout(0.3),
+        Dense(2, activation='softmax')
+    ])
 
     return model
 
@@ -66,18 +81,12 @@ def test_model(model, test_inputs, test_labels):
     return model.evaluate(test_inputs, test_labels, batch_size=32)
 
 def main():
-    # print("Training")
-    # train_inputs, train_labels = get_data('MURA-v1.1/train_image_paths.csv','MURA-v1.1/train_labeled_studies.csv')
-    # print("finished training")
-    #test_inputs, test_labels = get_data('MURA-v1.1/valid_image_paths.csv', 'MURA-v1.1/valid_labeled_studies.csv')
-    labels, images = source_label_and_image('MURA-v1.1/valid_image_paths.csv')
-    print(labels)
-    print(images)
-    model = init_model()
-    train_model(model, images, labels)
-    #result = test_model(model, test_inputs, test_labels)
-    #print(result)
-    print("ass!")
+    train_labels, train_images = get_data(args.train_csv_path, args.warp_size)
+    test_labels, test_images = get_data(args.test_csv_path, args.warp_size)
+
+    model = init_model(args.warp_size)
+    train_model(model, train_images, train_labels)
+    test_model(model, test_images, test_labels)
 
 if __name__ == '__main__':
 	main()
