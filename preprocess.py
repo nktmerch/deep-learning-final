@@ -35,9 +35,11 @@ def get_image(file_path, warp_size):
 	# network should (somehow) handle images of different
 	# sizes.
 	image = resize(image, (warp_size,warp_size))
+	image = np.asarray(image, dtype = np.float32)
+	image = np.expand_dims(image, axis = 2)
 	return image
 
-def get_images_and_labels(csv_path, warp_size):
+def get_data(csv_path, warp_size):
 	labels = []
 	images = []
 	with open(csv_path) as csv_file:
@@ -58,15 +60,6 @@ def get_images_and_labels(csv_path, warp_size):
 		.format(imgs_read, csv_path))
 
 	return labels, images
-
-def get_data(csv_path, warp_size):
-	labels, images = get_images_and_labels(csv_path, warp_size)
-	np_labels = np.asarray(labels, dtype=np.int8)
-	np_images = np.asarray(images, dtype=np.float32)
-	# We have to make this single channeled I believe
-	np_images = np.reshape(np_images, np_images.shape + (1,))
-	
-	return np_labels, np_images
 
 def main():
 	_, images = get_data(args.csv_path, args.warp_size)
