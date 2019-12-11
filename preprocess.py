@@ -34,7 +34,8 @@ def get_image(file_path, warp_size):
 	# numpy array, we should do no warping, and our 
 	# network should (somehow) handle images of different
 	# sizes.
-	image = resize(image, (warp_size,warp_size))
+	warp_width, warp_height = warp_size
+	image = resize(image, (warp_width, warp_height))
 	image = np.asarray(image, dtype = np.float32)
 	image = np.expand_dims(image, axis = 2)
 	return image
