@@ -16,6 +16,16 @@ from tensorflow.keras.layers import (
     Dense
 )
 
+"""
+IMPLEMENTED BY ADAM, BOWEN, AND KIRAN
+
+Referencing these DenseNet model architectures:
+
+https://github.com/liuzhuang13/DenseNet
+https://github.com/taki0112/Densenet-Tensorflow
+https://github.com/keras-team/keras-applications/blob/master/keras_applications/densenet.py
+"""
+
 from preprocess import get_data
 
 parser = argparse.ArgumentParser(description='ASSIGNMENT')
@@ -34,6 +44,10 @@ parser.add_argument('--drop-rate', type=float, default=.2,
                     help='for dropout lol')
 parser.add_argument('--batch-size', type=int, default=100,
                     help='literally the batch size')
+
+parser.add_argument('--num-epochs', type=int, default=10,
+                    help='actually for real the number of epochs')
+
 args = parser.parse_args()
 
 def postfix(name):
@@ -97,7 +111,6 @@ def DenseNet(shape, k, drop_rate, training):
     x = Activation('relu', name = 'rl')(x)
     x = GlobalAveragePooling2D(name = 'gp')(x)
     x = Flatten()(x)
-    # I changed this from 2 -> 1 to use binary crossentropy loss, not sure what's better
     x = Dense(1)(x) 
 
     return Model(inputs=image_input, outputs=x, name='densenet')
@@ -115,12 +128,15 @@ def main():
     test_images = tf.convert_to_tensor(test_images)
 
     # Instantiate, compile, and train
-    input_shape = (args.warp_size, args.warp_size, )
-     # TODO: How do we make this false later?
-    model = DenseNet((128, 128, 1), args.growth_k, args.drop_rate, True)
+
+    # One channel for our black and white images
+    input_shape = args.warp_size + (1,)
+
+     # TODO: How do we make training=False false later?
+    model = DenseNet(input_shape, args.growth_k, args.drop_rate, True)
     model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
     model.fit(train_images, train_labels, batch_size=args.batch_size,
-                validation_data = (test_images, test_labels))
+                epochs=args.num_epochs, validation_data = (test_images, test_labels))
 
 if __name__ == '__main__':
 	main()

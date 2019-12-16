@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description='PREPROCESS')
 parser.add_argument('--csv-path', type=str, default='MURA-v1.1/valid_image_paths.csv',
 					help='Path to the CSV list of folder sorted images')
 
-parser.add_argument('--warp-size', type=int, default=128,
+parser.add_argument('--warp-size', type=int, default=(128,128),
                     help='Shape we warp images to')
 
 parser.add_argument('--img-num', type=int, default=0,
